@@ -1,8 +1,11 @@
-var postURL = 'https://script.google.com/macros/s/AKfycbz9vrxvqiHk9gFLxFU4FTsM2tHTo1leh1CYxVO3foM0BJMN7Srr1ohSAif1ftBM0PI/exec';
-var getURL = 'https://script.google.com/macros/s/AKfycbwmeb4AKGSoPc7-7URWWil_BpDWXueMiMmAcE6RnQWsKiabSB-1VeQhhucVLyyvWpXW/exec';
-var getdailyURL = 'https://script.google.com/macros/s/AKfycbwZSXOZTzz--npozzkW2FOiXBzd2HMV4hPh8Xy3w4u4tH3F-tACDydqTylDfWi6yS8h/exec'
+var scriptURL;
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
+
+    var response = await fetch('config.json');
+    var configData = await response.json();
+    scriptURL = configData['scriptURL'];
+
     var loadDataButton = document.getElementById('loadDataButton');
     loadDataButton.addEventListener('click', function() {
         loadDataButton.style.display = 'none';
@@ -59,7 +62,7 @@ function submitFormData() {
     formData.forEach((value, key) => { object[key] = value; });
 
     // Fetch request to send the JSON data using baseURL with action parameter
-    fetch(postURL + '?action=addUser', {
+    fetch(scriptURL + '?action=addUser', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -90,7 +93,7 @@ function removeSubmitButton() {
 
 function fetchTotalJobsApplied() {
     // Fetch request using baseURL with a different action parameter
-    fetch(getURL + '?action=getUsers', {
+    fetch(scriptURL + '?action=getUsers', {
         method: 'GET'
     })
     .then(response => response.json())
@@ -118,7 +121,7 @@ function logTotalJobs(data) {
 }
 
 function fetchTotalJobsAppliedToday() {
-    fetch(getdailyURL+'?action=getDailyTotal', {
+    fetch(scriptURL+'?action=getDailyTotal', {
         method: 'GET'
     })
     .then(response => response.json())
