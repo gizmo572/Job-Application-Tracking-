@@ -120,13 +120,11 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 function removePrevAppliedFromSearchResults(prevApplied) {
     // select all search results and iterate through them
     var companies = document.querySelectorAll('span.job-card-container__primary-description');
-    console.log('companies', companies, 'prevApplied', prevApplied)
     Array.from(companies).map(company => {
         var companyName = company.textContent.trim() || "";
         var jobTitle = company.parentNode.parentNode.querySelector('div > a.job-card-list__title > strong').textContent.trim() || "";
-      
         // remove search result if we have already applied for that job title at that company
-        if (companyName in prevApplied && !(jobTitle in prevApplied[companyName])) {
+        if (companyName in prevApplied && prevApplied[companyName].includes(jobTitle)) {
             var companyContainer = company.closest('div.job-card-container');
             companyContainer.remove();
         }
