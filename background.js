@@ -13,15 +13,13 @@ function injectScript(tabId) {
 async function onStartUp() {
     var response = await fetch('config.json');
     configVariables = await response.json();
-    console.log('configVars', configVariables)
     
     var getPrevAppliedJobs = await fetch(configVariables.scriptURL + '?action=getPrevApplied', {
         method: 'GET'
     })
-    console.log('getprevappliedjobs', getPrevAppliedJobs)
     var prevAppliedJobs = await getPrevAppliedJobs.json();
-    console.log('APP STARTED!!! PREV APPLIED: ', prevAppliedJobs)
     chrome.storage.local.set({ 'prevAppliedJobs': prevAppliedJobs });
+    console.log('prevAppliedJobs: ', prevAppliedJobs)
 }
 
 var configVariables;
@@ -46,6 +44,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
         });
     };
     if (changeInfo.url && tab.url.startsWith("https://www.linkedin.com/jobs/search/")) {
+        chrome.tabs.sendMessage(tabId, { action: "removePrevApplied" });
         chrome.tabs.sendMessage(tabId, { action: "loadData" });
     }
 });
@@ -69,9 +68,21 @@ chrome.runtime.onMessage.addListener(
               .then(response => response.json())
               .then(data => {
                   console.log('Response:', data);
+                  storeData(data);
+                  notifyTabOfSubmit();
               })
           })
       }
       return true
   }
 )
+
+function notifyTabOfSubmit() {
+  chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+      chrome.tabs.sendMessage(tabs[0].id, { action: "appSubmitted" });
+  });
+}
+
+function storeData(data) {
+  chrome.storage.local.set({ 'lastJobAdded': data })
+}

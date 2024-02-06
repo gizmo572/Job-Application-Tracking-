@@ -72,6 +72,8 @@ function submitFormData() {
     .then(response => response.json())
     .then(data => {
         console.log('Response:', data);
+        storeData(data);
+        notifyTabOfSubmit();
         fetchTotalJobsApplied(); // Fetch total jobs applied after successful submission
     })
     .catch(error => console.error('Error:', error));
@@ -147,4 +149,16 @@ function logTotalJobsToday(data) {
     }
 
     resultDiv.appendChild(jobsMessage);
+}
+
+
+
+function notifyTabOfSubmit() {
+  chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+      chrome.tabs.sendMessage(tabs[0].id, { action: "appSubmitted" });
+  });
+}
+
+function storeData(data) {
+  chrome.storage.local.set({ 'lastJobAdded': data })
 }

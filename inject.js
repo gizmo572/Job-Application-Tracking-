@@ -5,6 +5,26 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         return true;
     }
 
+    if (request.action === "removePrevApplied") {
+        chrome.storage.local.get(['prevAppliedJobs'], async function(result) {
+            removePrevAppliedFromSearchResults(result.prevAppliedJobs);
+        });
+    }
+    
+    if (request.action === "appSubmitted") {
+        chrome.storage.local.get(['prevAppliedJobs', 'lastJobAdded'], function(result) {
+            var prevAppliedJobs = result.prevAppliedJobs || {};
+            var newCompany = result.lastJobAdded.company || null;
+            var jobTitle = result.lastJobAdded.jobTitle || null;
+            if (newCompany in prevAppliedJobs) {
+                prevAppliedJobs[newCompany].push(jobTitle);
+            } else prevAppliedJobs[newCompany] = [jobTitle];
+
+            chrome.storage.local.set({ 'prevAppliedJobs': prevAppliedJobs });
+
+            removePrevAppliedFromSearchResults(prevAppliedJobs);
+        });
+    }
 
     if (request.action === "loadData") {
         var pageUrl = window.location.href;
@@ -95,6 +115,23 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 
 
 
+/* LINKEDIN SEARCH FEATURE: auto-remove previously applied to jobs from search results  */
+
+function removePrevAppliedFromSearchResults(prevApplied) {
+    // select all search results and iterate through them
+    var companies = document.querySelectorAll('span.job-card-container__primary-description');
+    console.log('companies', companies, 'prevApplied', prevApplied)
+    Array.from(companies).map(company => {
+        var companyName = company.textContent.trim() || "";
+        var jobTitle = company.parentNode.parentNode.querySelector('div > a.job-card-list__title > strong').textContent.trim() || "";
+      
+        // remove search result if we have already applied for that job title at that company
+        if (companyName in prevApplied && !(jobTitle in prevApplied[companyName])) {
+            var companyContainer = company.closest('div.job-card-container');
+            companyContainer.remove();
+        }
+    });
+};
 
 
 
