@@ -1,12 +1,10 @@
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-    console.log('new script injection', request)
-
 
     if (request.action === "checkInjected") {
         sendResponse({status: "active"});
         return true;
     }
-    
+
 
     if (request.action === "loadData") {
         var pageUrl = window.location.href;
@@ -40,6 +38,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
             } else {
                 company = "";
             }
+            listenForApply();
             unknownInput = "Unknown";
             applicationDateTime = getCurrentDateTimeFormatted();
             var jobUrlElement = document.querySelector('.job-details-jobs-unified-top-card__job-title a');
@@ -93,3 +92,65 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         return true; // Indicates that the response is asynchronous
     }
 });
+
+
+
+
+
+
+
+/* LINKEDIN SEARCH FEATURE: auto-send data to google spreadsheet on EasyApply submit */
+
+var applyBTN;
+
+function listenForApply() {
+    applyBTN = document.querySelector('button.jobs-apply-button');
+    if (applyBTN) applyBTN.addEventListener('click', applyBtnListener);
+
+}
+
+function applyBtnListener() {
+    applyBTN.removeEventListener('click', applyBtnListener);
+
+    document.body.addEventListener('click', searchForSubmitBTN);
+}
+
+var submitBTN;
+
+function searchForSubmitBTN() {
+    submitBTN = document.querySelector('[aria-label="Submit application"]') || null
+    if (submitBTN) {
+        addSubmitBtnListener(submitBTN);
+    } else {
+        var nextBTN = document.querySelector('[aria-label="Continue to next step"]') || null;
+        var reviewBTN = document.querySelector('[aria-label="Review your application"]') || null;
+        var preApplyBTN = document.querySelector('button.job-details-pre-apply-safety-tips-modal__review-button') || null;
+        console.log('nxtbtn', nextBTN, 'reviewbtn', reviewBTN, 'preApplyBTN', preApplyBTN);
+        if (!nextBTN && !reviewBTN && !preApplyBTN) {
+            document.body.removeEventListener('click', searchForSubmitBTN);
+            return;
+        }
+    }
+}
+
+function addSubmitBtnListener() {
+    submitBTN.removeEventListener('click', submitClick);
+    submitBTN.addEventListener('click', submitClick);
+
+}
+
+
+
+function submitClick() {
+    document.body.removeEventListener('click', searchForSubmitBTN);
+    submitBTN.removeEventListener('click', submitClick);
+    sendApplyData();
+}
+
+
+
+function sendApplyData() {
+    chrome.runtime.sendMessage('appSubmitted', function(response) {
+        console.log('response', response)
+    })
+}

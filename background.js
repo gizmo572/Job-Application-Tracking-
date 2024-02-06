@@ -10,6 +10,15 @@ function injectScript(tabId) {
 
 }
 
+async function onStartUp() {
+    var response = await fetch('config.json');
+    configVariables = await response.json();
+}
+
+var configVariables;
+
+onStartUp();
+
 // adds a listener to tab change
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 
@@ -27,4 +36,33 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
             }
         });
     };
+    if (changeInfo.url && tab.url.startsWith("https://www.linkedin.com/jobs/search/")) {
+        chrome.tabs.sendMessage(tabId, { action: "loadData" });
+    }
 });
+
+
+// listen for messages from scripts
+chrome.runtime.onMessage.addListener(
+  function(request, sender, sendResponse) {
+
+      // if request contains job posting info, this indicates a corresponding job app was submitted, and the data should be sent to google spreadsheet
+      if (request == 'appSubmitted') {
+
+          chrome.storage.local.get(['jobTitle', 'company', 'unknownInput', 'applicationDateTime', 'url'], function(object) {
+              fetch(configVariables.scriptURL + '?action=addUser', {
+                  method: 'POST',
+                  headers: {
+                      'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify(object)
+              })
+              .then(response => response.json())
+              .then(data => {
+                  console.log('Response:', data);
+              })
+          })
+      }
+      return true
+  }
+)
