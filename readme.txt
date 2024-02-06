@@ -86,6 +86,9 @@ if(action=='getUsers'){
 if(action=='getDailyTotal'){
   return getDailyTotal(e); 
 }
+if(action=='getPrevApplied'){
+    return getPrevApplied(e);
+}
 }
 
 function getUsers(e) {
@@ -111,6 +114,27 @@ function getDailyTotal(e) {
     }
 }
 
+function getPrevApplied(e) {
+    var companies = {};
+    try {
+        var lastRow = sheet.getLastRow();
+
+        for (var i = 2; i <= lastRow; i++) {
+            var company = sheet.getRange(i, 2).getValue();
+            var jobTitle = sheet.getRange(i, 1).getValue();
+
+            if (Object.hasOwn(companies, company)) {
+                companies[company].push(jobTitle);
+            } else companies[company] = [jobTitle];
+        }
+
+        var result = JSON.stringify(companies);
+        return ContentService.createTextOutput(result).setMimeType(ContentService.MimeType.JSON);
+    } catch (error) {
+        console.error('Error in getPrevApplied:', error);
+        return ContentService.createTextOutput("Error: " + error.message).setMimeType(ContentService.MimeType.TEXT);
+    }
+}
 
 
 //END OF CODE

@@ -13,6 +13,15 @@ function injectScript(tabId) {
 async function onStartUp() {
     var response = await fetch('config.json');
     configVariables = await response.json();
+    console.log('configVars', configVariables)
+    
+    var getPrevAppliedJobs = await fetch(configVariables.scriptURL + '?action=getPrevApplied', {
+        method: 'GET'
+    })
+    console.log('getprevappliedjobs', getPrevAppliedJobs)
+    var prevAppliedJobs = await getPrevAppliedJobs.json();
+    console.log('APP STARTED!!! PREV APPLIED: ', prevAppliedJobs)
+    chrome.storage.local.set({ 'prevAppliedJobs': prevAppliedJobs });
 }
 
 var configVariables;
