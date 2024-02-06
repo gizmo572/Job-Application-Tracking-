@@ -1,4 +1,13 @@
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+    console.log('new script injection', request)
+
+
+    if (request.action === "checkInjected") {
+        sendResponse({status: "active"});
+        return true;
+    }
+    
+
     if (request.action === "loadData") {
         var pageUrl = window.location.href;
         var jobTitle, company, unknownInput, applicationDateTime, url;
