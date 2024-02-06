@@ -74,7 +74,7 @@ function addUser(e){
   var user=JSON.parse(e.postData.contents);
   sheet.appendRow([user.jobTitle, user.company,user.unknownInput,user.applicationDateTime,user.url]); 
 
-  return ContentService.createTextOutput("Success").setMimeType("ContentService.MimeType.TEXT")
+  return ContentService.createTextOutput(JSON.stringify(user)).setMimeType(ContentService.MimeType.JSON)
 }
 
 function doGet(e){
@@ -110,6 +110,8 @@ function getDailyTotal(e) {
         return ContentService.createTextOutput("Error: " + error.message).setMimeType(ContentService.MimeType.TEXT);
     }
 }
+
+
 
 //END OF CODE
 
