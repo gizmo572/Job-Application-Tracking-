@@ -20,6 +20,10 @@ async function onStartUp() {
     var prevAppliedJobs = await getPrevAppliedJobs.json();
     chrome.storage.local.set({ 'prevAppliedJobs': prevAppliedJobs });
     console.log('prevAppliedJobs: ', prevAppliedJobs)
+    // var jobsPerCompany = Object.keys(prevAppliedJobs).map(company => {
+    //     return prevAppliedJobs[company].length;
+    // }).sort();
+    // console.log('jobsPer', jobsPerCompany)
 }
 
 var configVariables;

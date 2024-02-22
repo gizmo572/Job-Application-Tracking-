@@ -119,14 +119,19 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 
 function removePrevAppliedFromSearchResults(prevApplied) {
     // select all search results and iterate through them
-    var companies = document.querySelectorAll('span.job-card-container__primary-description');
+    var companies = document.querySelectorAll('span.job-card-container__primary-description ');
     Array.from(companies).map(company => {
         var companyName = company.textContent.trim() || "";
         var jobTitle = company.parentNode.parentNode.querySelector('div > a.job-card-list__title > strong').textContent.trim() || "";
+
+        var jobContainer = company.closest('div.job-card-container');
+        var appliedXDaysAgo = jobContainer.querySelector('ul.job-card-container__footer-wrapper > li > strong > span') || null
+
         // remove search result if we have already applied for that job title at that company
-        if (companyName in prevApplied && prevApplied[companyName].includes(jobTitle)) {
-            var companyContainer = company.closest('div.job-card-container');
-            companyContainer.remove();
+        if ((companyName in prevApplied && prevApplied[companyName].includes(jobTitle)) ||
+           (appliedXDaysAgo && appliedXDaysAgo.textContent.includes('Applied'))
+        ) {
+            jobContainer.remove();
         }
     });
 };
