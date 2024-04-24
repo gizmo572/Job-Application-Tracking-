@@ -27,8 +27,9 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     }
 
     if (request.action === "loadData") {
-        var pageUrl = window.location.href;
-        var jobTitle, company, unknownInput, applicationDateTime, url;
+      var pageUrl = window.location.href;
+      var jobTitle, company, unknownInput, applicationDateTime, url;
+      console.log('loadData triggered. Page URL: ', pageUrl)
 
         function getCurrentDateTimeFormatted() {
             var now = new Date();
@@ -50,8 +51,9 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
             applicationDateTime = getCurrentDateTimeFormatted();
             url = pageUrl;
         } else if (pageUrl.startsWith("https://www.linkedin.com/jobs/collections/") || pageUrl.startsWith("https://www.linkedin.com/jobs/search/")) {
-            jobTitle = document.querySelector('.job-details-jobs-unified-top-card__job-title-link')?.textContent.trim() || "";
-            var companyElement = document.querySelector('.job-details-jobs-unified-top-card__primary-description-without-tagline');
+            console.log('pageURL registered')
+            jobTitle = document.querySelector('.job-details-jobs-unified-top-card__job-title')?.textContent.trim() || "";
+            var companyElement = document.querySelector('.job-details-jobs-unified-top-card__company-name');
             if (companyElement) {
                 var companyText = companyElement.textContent.split('·')[0].trim();
                 company = companyText;
@@ -145,14 +147,17 @@ var applyBTN;
 
 function listenForApply() {
     applyBTN = document.querySelector('button.jobs-apply-button');
-    if (applyBTN) applyBTN.addEventListener('click', applyBtnListener);
+    console.log('listening for Apply BTN. applyBTN: ', applyBTN)
+    if (applyBTN) setTimeout(() => applyBTN.addEventListener('click', applyBtnListener),500);
 
 }
 
 function applyBtnListener() {
+    console.log('apply btn clicked!')
     applyBTN.removeEventListener('click', applyBtnListener);
-
+    console.log('excess listeners removed!')
     document.body.addEventListener('click', searchForSubmitBTN);
+    console.log('new listener added!')
 }
 
 var submitBTN;
